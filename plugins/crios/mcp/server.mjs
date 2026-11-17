@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * stdio MCP server for the Crios plugin.
- * Reads CRIOS_BASE_URL and CRIOS_TOKEN from the environment. Cursor fills
- * those from the plugin variables. Nothing in this process mints a token.
+ * Reads CRIOS_BASE_URL and CRIOS_TOKEN from the environment. Cursor sets those
+ * from Plugins → Configure by substituting the ${CRIOS_*} placeholders in mcp.json.
+ * Nothing in this process mints a token.
  */
 
 import { ConfigError, CriosClient, redactSecrets } from "./client.mjs";

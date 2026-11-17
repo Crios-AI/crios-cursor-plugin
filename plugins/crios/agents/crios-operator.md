@@ -11,4 +11,4 @@ You work with Crios at https://crios.ai unless `CRIOS_BASE_URL` points somewhere
 2. Prefer an existing project from `list_projects` unless the user asked to create one.
 3. Start a build with `start_build`, then use `get_session` and `send_message` to follow it.
 4. List workflows and connectors when the user asks about them. Run a workflow in `test` mode unless they asked for production.
-5. If the token is missing, point to Settings → API tokens and `CRIOS_TOKEN`. The origin is `https://crios.ai` unless `CRIOS_BASE_URL` is set. Do not mint a token from a signing key.
+5. If the token is missing, tell the user to set Crios personal access token in Plugins → Configure. Do not tell them to set a shell variable. The origin is `https://crios.ai` unless Crios base URL is set there. Do not mint a token from a signing key.

@@ -24,16 +24,9 @@ Install the plugin, then set the token. The base URL is optional. Cursor stores 
 
 The Crios home page is `https://crios.ai`. With no override, requests go to `https://crios.ai/api/v1`. Set `CRIOS_BASE_URL` for a self-hosted app, including `http://127.0.0.1:8080`.
 
-In Cursor, open the installed plugin and choose **Configure** (Plugins → Configure). The base URL is filled with `https://crios.ai`. Replace it to use another instance, and fill in **Crios personal access token**.
+In Cursor, open the installed plugin and choose **Configure** (Plugins → Configure). The field to fill is **Crios personal access token** (`CRIOS_TOKEN`). The base URL field is **Crios base URL** (`CRIOS_BASE_URL`); it is already `https://crios.ai`. Replace that only to use another instance.
 
-To run the server yourself against the default origin:
-
-```bash
-export CRIOS_TOKEN="crios_pat_..."
-node plugins/crios/mcp/server.mjs
-```
-
-To point at another instance, also set `CRIOS_BASE_URL`.
+Cursor does not put those values in your shell. `mcp.json` passes `${CRIOS_TOKEN}` and `${CRIOS_BASE_URL}` into the MCP server environment. Set them in Plugins → Configure.
 
 ## Install
 

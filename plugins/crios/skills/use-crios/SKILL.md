@@ -10,8 +10,8 @@ Crios is the product at https://crios.ai. This plugin talks to that origin's HTT
 ## Before calling
 
 1. The default origin is `https://crios.ai`, so the API root is `https://crios.ai/api/v1`. Set `CRIOS_BASE_URL` to use another app or API origin. The plugin adds `/api/v1` when that path is missing.
-2. Authentication is a personal access token in `CRIOS_TOKEN`, created under Settings → API tokens. It starts with `crios_pat_`.
-3. Do not mint a token, and do not read `jwt-signing-key`. If the token is missing, say how to create one. Do not invent a value.
+2. Authentication is the **Crios personal access token** field (`CRIOS_TOKEN`) in Plugins → Configure. The token is created under Settings → API tokens and starts with `crios_pat_`. Cursor passes that configured value into the MCP server.
+3. Do not mint a token, and do not read `jwt-signing-key`. If the token is missing, tell the user to set Crios personal access token in Plugins → Configure. Do not tell them to set a shell variable, and do not invent a value.
 4. Call `whoami` when a later call returns 401 or 403, and report the user, role, and organization from that result.
 
 A fine-grained token with `projects` and `sessions` can list projects, start builds, and list project connectors. Workflow tools call `/workflows`, which needs a full-access token.
