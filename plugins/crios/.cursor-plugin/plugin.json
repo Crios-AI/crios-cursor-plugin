@@ -11,6 +11,7 @@
   "homepage": "https://crios.ai",
   "repository": "https://github.com/Crios-AI/crios-cursor-plugin",
   "logo": "assets/logo.svg",
+  "mcpServers": "./mcp.json",
   "variables": {
     "type": "object",
     "properties": {
@@ -23,7 +24,7 @@
       "CRIOS_TOKEN": {
         "type": "string",
         "title": "Crios personal access token",
-        "description": "Personal access token from Crios Settings → API tokens. It starts with crios_pat_. A full-access token is required for workflows."
+        "description": "Personal access token from Crios Settings → API tokens. Set it here in Plugins → Configure. It starts with crios_pat_. A full-access token is required for workflows."
       }
     },
     "required": ["CRIOS_TOKEN"]

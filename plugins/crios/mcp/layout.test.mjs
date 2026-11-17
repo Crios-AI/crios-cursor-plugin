@@ -34,14 +34,17 @@ test("marketplace and plugin manifests follow the template", async () => {
   assert.equal(manifest.displayName, "Crios");
   assert.equal(manifest.logo, "assets/logo.svg");
   assert.equal(manifest.homepage, DEFAULT_ORIGIN);
+  assert.equal(manifest.mcpServers, "./mcp.json");
   assert.equal(manifest.variables.properties.CRIOS_BASE_URL.default, DEFAULT_ORIGIN);
+  assert.equal(manifest.variables.properties.CRIOS_TOKEN.title, "Crios personal access token");
   assert.deepEqual(manifest.variables.required, ["CRIOS_TOKEN"]);
   await readFile(path.join(pluginRoot, manifest.logo));
 
   const server = mcp.mcpServers.crios;
   assert.deepEqual(server.args, ["${CURSOR_PLUGIN_ROOT}/mcp/server.mjs"]);
-  assert.equal(server.env.CRIOS_BASE_URL, "${CRIOS_BASE_URL}");
-  assert.equal(server.env.CRIOS_TOKEN, "${CRIOS_TOKEN}");
+  for (const name of Object.keys(manifest.variables.properties)) {
+    assert.equal(server.env[name], `\${${name}}`, `${name} must be passed from plugin config into the MCP server env`);
+  }
   assert.match(cursorIgnore, /^plans\//);
 });
 
@@ -82,6 +85,10 @@ test("commands, the skill, and the agent name real tools", async () => {
   assert.match(parseFrontmatter(rule).description, /token/i);
   assert.match(rule, /https:\/\/crios\.ai/);
   assert.match(rule, /jwt-signing-key/);
+  assert.match(rule, /Plugins → Configure/);
+  assert.match(skill, /Plugins → Configure/);
+  const whoami = await readFile(path.join(commandDir, "crios-whoami.md"), "utf8");
+  assert.match(whoami, /Crios personal access token/);
 
   assert.ok(mentioned.has("whoami"));
   assert.ok(mentioned.has("start_build"));

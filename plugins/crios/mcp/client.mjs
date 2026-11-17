@@ -69,7 +69,7 @@ export function normalizeBaseUrl(raw) {
 export function assertToken(raw) {
   if (typeof raw !== "string" || raw.trim() === "" || looksLikePlaceholder(raw)) {
     throw new ConfigError(
-      "CRIOS_TOKEN is not set. Create a personal access token in Crios under Settings → API tokens and paste that value. It starts with crios_pat_.",
+      "CRIOS_TOKEN is not set. Open Plugins → Configure and set Crios personal access token. Create the token in Crios under Settings → API tokens. It starts with crios_pat_. Cursor passes that configured value into this server.",
     );
   }
 
