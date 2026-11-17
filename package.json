@@ -1,0 +1,14 @@
+{
+  "name": "crios-cursor-plugin",
+  "private": true,
+  "type": "module",
+  "description": "Cursor plugin that calls the Crios HTTP API.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "check": "node --check plugins/crios/mcp/client.mjs && node --check plugins/crios/mcp/tools.mjs && node --check plugins/crios/mcp/server.mjs",
+    "test": "node --test plugins/crios/mcp/*.test.mjs",
+    "validate": "node scripts/validate-template.mjs"
+  }
+}

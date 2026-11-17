@@ -1,0 +1,17 @@
+{
+  "name": "crios",
+  "owner": {
+    "name": "Crios AI"
+  },
+  "metadata": {
+    "description": "Cursor plugins for working with a Crios instance from the editor.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "crios",
+      "source": "./plugins/crios",
+      "description": "List Crios projects, start build sessions, inspect workflows, and read connector status."
+    }
+  ]
+}
