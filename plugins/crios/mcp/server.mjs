@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * stdio MCP server for the Crios plugin.
- * Reads CRIOS_BASE_URL and CRIOS_TOKEN from the environment. Cursor sets those
- * from Plugins → Configure by substituting the ${CRIOS_*} placeholders in mcp.json.
+ * Local stdio server for tests and for running this client directly.
+ * Cursor does not start this process. The installed plugin connects to
+ * https://mcp.crios.ai/mcp and sends the configured token in the Authorization header.
+ * When this process is started, it reads CRIOS_BASE_URL and CRIOS_TOKEN from the environment.
  * Nothing in this process mints a token.
  */
 

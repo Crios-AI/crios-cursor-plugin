@@ -1,10 +1,12 @@
 /**
  * HTTP client for the Crios REST API (/api/v1).
- * The default origin is the Crios app home. CRIOS_BASE_URL overrides it.
+ * The product home is https://crios.ai. The default API origin is https://api.crios.ai.
+ * CRIOS_BASE_URL overrides that API origin.
  * This module never reads a signing key and never creates a token.
  */
 
-export const DEFAULT_ORIGIN = "https://crios.ai";
+export const PRODUCT_HOME = "https://crios.ai";
+export const DEFAULT_ORIGIN = "https://api.crios.ai";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 export const MAX_RESPONSE_CHARS = 1_000_000;

@@ -1,11 +1,9 @@
 {
   "mcpServers": {
     "crios": {
-      "command": "node",
-      "args": ["${CURSOR_PLUGIN_ROOT}/mcp/server.mjs"],
-      "env": {
-        "CRIOS_BASE_URL": "${CRIOS_BASE_URL}",
-        "CRIOS_TOKEN": "${CRIOS_TOKEN}"
+      "url": "https://mcp.crios.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer ${CRIOS_TOKEN}"
       }
     }
   }

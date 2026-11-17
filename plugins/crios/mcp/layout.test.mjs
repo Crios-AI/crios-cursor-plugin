@@ -4,20 +4,19 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { DEFAULT_ORIGIN } from "./client.mjs";
-import { TOOLS } from "./tools.mjs";
+import { DEFAULT_ORIGIN, PRODUCT_HOME } from "./client.mjs";
 
 const pluginRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.resolve(pluginRoot, "../..");
-const toolNames = new Set(TOOLS.map((tool) => tool.name));
+const MCP_URL = "https://mcp.crios.ai/mcp";
 
 const commandTools = {
-  "crios-whoami": ["whoami"],
-  "crios-projects": ["list_projects", "get_project", "create_project"],
+  "crios-whoami": ["list_projects"],
+  "crios-projects": ["list_projects", "create_project"],
   "crios-start-build": ["list_projects", "start_build", "send_message"],
-  "crios-session": ["get_session", "list_sessions", "send_message"],
-  "crios-workflows": ["list_workflows", "run_workflow", "get_execution"],
-  "crios-connectors": ["list_connectors", "list_projects"],
+  "crios-session": ["get_session_status", "wait_for_session", "send_message"],
+  "crios-workflows": ["workflow_list", "workflow_run", "execution_status"],
+  "crios-connectors": ["credential_list", "list_projects"],
 };
 
 test("marketplace and plugin manifests follow the template", async () => {
@@ -33,7 +32,10 @@ test("marketplace and plugin manifests follow the template", async () => {
   assert.equal(manifest.name, "crios");
   assert.equal(manifest.displayName, "Crios");
   assert.equal(manifest.logo, "assets/logo.svg");
-  assert.equal(manifest.homepage, DEFAULT_ORIGIN);
+  assert.equal(PRODUCT_HOME, "https://crios.ai");
+  assert.equal(DEFAULT_ORIGIN, "https://api.crios.ai");
+  assert.equal(manifest.homepage, PRODUCT_HOME);
+  assert.notEqual(manifest.homepage, DEFAULT_ORIGIN);
   assert.equal(manifest.mcpServers, "./mcp.json");
   assert.equal(manifest.variables.properties.CRIOS_BASE_URL.default, DEFAULT_ORIGIN);
   assert.equal(manifest.variables.properties.CRIOS_TOKEN.title, "Crios personal access token");
@@ -41,10 +43,12 @@ test("marketplace and plugin manifests follow the template", async () => {
   await readFile(path.join(pluginRoot, manifest.logo));
 
   const server = mcp.mcpServers.crios;
-  assert.deepEqual(server.args, ["${CURSOR_PLUGIN_ROOT}/mcp/server.mjs"]);
-  for (const name of Object.keys(manifest.variables.properties)) {
-    assert.equal(server.env[name], `\${${name}}`, `${name} must be passed from plugin config into the MCP server env`);
-  }
+  assert.equal(server.url, MCP_URL);
+  assert.equal(server.command, undefined);
+  assert.equal(server.args, undefined);
+  assert.equal(server.headers.Authorization, "Bearer ${CRIOS_TOKEN}");
+  assert.equal(JSON.stringify(mcp).includes("server.mjs"), false);
+  assert.equal(JSON.stringify(mcp).includes("crios_oat_"), false);
   assert.match(cursorIgnore, /^plans\//);
 });
 
@@ -62,7 +66,6 @@ test("commands, the skill, and the agent name real tools", async () => {
     assert.ok(frontmatter.description.length > 10, file);
     for (const tool of commandTools[stem]) {
       assert.match(content, new RegExp(`\\b${tool}\\b`), `${file} should name ${tool}`);
-      assert.ok(toolNames.has(tool), tool);
       mentioned.add(tool);
     }
   }
@@ -72,7 +75,9 @@ test("commands, the skill, and the agent name real tools", async () => {
   assert.equal(skillFrontmatter.name, "use-crios");
   assert.match(skillFrontmatter.description, /projects|sessions|workflows|connectors/);
   assert.match(skill, /https:\/\/crios\.ai/);
-  for (const tool of toolNames) {
+  assert.match(skill, /https:\/\/api\.crios\.ai/);
+  assert.match(skill, /https:\/\/mcp\.crios\.ai\/mcp/);
+  for (const tool of mentioned) {
     assert.match(skill, new RegExp(`\\b${tool}\\b`), `skill should document ${tool}`);
   }
 
@@ -84,15 +89,17 @@ test("commands, the skill, and the agent name real tools", async () => {
   const rule = await readFile(path.join(pluginRoot, "rules/crios-credentials.mdc"), "utf8");
   assert.match(parseFrontmatter(rule).description, /token/i);
   assert.match(rule, /https:\/\/crios\.ai/);
+  assert.match(rule, /https:\/\/api\.crios\.ai/);
+  assert.match(rule, /https:\/\/mcp\.crios\.ai\/mcp/);
   assert.match(rule, /jwt-signing-key/);
   assert.match(rule, /Plugins → Configure/);
   assert.match(skill, /Plugins → Configure/);
   const whoami = await readFile(path.join(commandDir, "crios-whoami.md"), "utf8");
   assert.match(whoami, /Crios personal access token/);
 
-  assert.ok(mentioned.has("whoami"));
+  assert.ok(mentioned.has("list_projects"));
   assert.ok(mentioned.has("start_build"));
-  assert.ok(mentioned.has("list_connectors"));
+  assert.ok(mentioned.has("credential_list"));
 });
 
 function parseFrontmatter(content) {
