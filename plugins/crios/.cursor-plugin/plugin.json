@@ -8,7 +8,7 @@
   },
   "license": "LicenseRef-Crios-All-Rights-Reserved",
   "keywords": ["crios", "projects", "sessions", "workflows", "connectors"],
-  "homepage": "https://github.com/Crios-AI/crios",
+  "homepage": "https://crios.ai",
   "repository": "https://github.com/Crios-AI/crios-cursor-plugin",
   "logo": "assets/logo.svg",
   "variables": {
@@ -17,7 +17,8 @@
       "CRIOS_BASE_URL": {
         "type": "string",
         "title": "Crios base URL",
-        "description": "Origin of your Crios API or web app, such as https://api.example.com or http://127.0.0.1:8080. Do not include a token in the URL."
+        "description": "App or API origin. Defaults to https://crios.ai. The plugin calls /api/v1 on that origin. Set this to point at another instance. Do not include a token in the URL.",
+        "default": "https://crios.ai"
       },
       "CRIOS_TOKEN": {
         "type": "string",
@@ -25,6 +26,6 @@
         "description": "Personal access token from Crios Settings → API tokens. It starts with crios_pat_. A full-access token is required for workflows."
       }
     },
-    "required": ["CRIOS_BASE_URL", "CRIOS_TOKEN"]
+    "required": ["CRIOS_TOKEN"]
   }
 }

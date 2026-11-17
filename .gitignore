@@ -7,7 +7,6 @@
 .DS_Store
 *.swp
 *.swo
-.cursor/
 
 # Logs and temp
 *.log

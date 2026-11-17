@@ -1,11 +1,13 @@
 /**
  * HTTP client for the Crios REST API (/api/v1).
- * The caller supplies a base URL and a personal access token. This module
- * never reads a signing key and never creates a token.
+ * The default origin is the Crios app home. CRIOS_BASE_URL overrides it.
+ * This module never reads a signing key and never creates a token.
  */
 
+export const DEFAULT_ORIGIN = "https://crios.ai";
+
 const DEFAULT_TIMEOUT_MS = 30_000;
-const MAX_RESPONSE_CHARS = 1_000_000;
+export const MAX_RESPONSE_CHARS = 1_000_000;
 
 const SECRET_KEY =
   /^(password|passwd|secret|token|access_token|refresh_token|id_token|api_key|apikey|api_token|authorization|private_key|client_secret|jwt|signing_key|jwt_signing_key|webhook_secret)$/i;
@@ -28,15 +30,12 @@ export class CriosError extends Error {
 }
 
 export function normalizeBaseUrl(raw) {
-  if (typeof raw !== "string" || raw.trim() === "" || looksLikePlaceholder(raw)) {
-    throw new ConfigError(
-      "CRIOS_BASE_URL is not set. Set it to your Crios API or app origin, for example https://api.example.com.",
-    );
-  }
+  const missing = typeof raw !== "string" || raw.trim() === "" || looksLikePlaceholder(raw);
+  const input = missing ? DEFAULT_ORIGIN : raw.trim();
 
   let url;
   try {
-    url = new URL(raw.trim());
+    url = new URL(input);
   } catch {
     throw new ConfigError("CRIOS_BASE_URL is not a valid URL.");
   }
@@ -186,18 +185,30 @@ export class CriosClient {
       );
     }
 
-    const text = await readLimited(response);
+    const ok = response.status >= 200 && response.status < 300;
+    const { text, truncated } = await readLimited(response);
+    if (truncated) {
+      throw new CriosError(
+        `Crios response for ${method} ${path} was larger than ${MAX_RESPONSE_CHARS} characters and was not used.`,
+      );
+    }
+
     let parsed = null;
     if (text) {
       try {
         parsed = JSON.parse(text);
       } catch {
-        parsed = { error: text.slice(0, 500) };
+        if (ok) {
+          throw new CriosError(
+            `Crios returned ${response.status} for ${method} ${path}, but the body was not JSON. Check CRIOS_BASE_URL. The API root in use is ${this.baseUrl}.`,
+          );
+        }
+        parsed = { error: redactSecrets(text.slice(0, 500)) };
       }
     }
 
     const safeBody = redact(parsed);
-    if (!response.ok) {
+    if (!ok) {
       const retryHeader = response.headers?.get?.("x-ratelimit-retry-after");
       const retryAfter = retryHeader ?? (parsed && typeof parsed === "object" ? parsed.retry_after : null);
       let message = errorMessage(response.status, safeBody);
@@ -216,9 +227,10 @@ export class CriosClient {
 }
 
 async function readLimited(response) {
-  if (!response || typeof response.text !== "function") return "";
+  if (!response || typeof response.text !== "function") return { text: "", truncated: false };
   const text = await response.text();
-  if (typeof text !== "string") return "";
-  if (text.length <= MAX_RESPONSE_CHARS) return text;
-  return text.slice(0, MAX_RESPONSE_CHARS);
+  if (typeof text !== "string" || text.length <= MAX_RESPONSE_CHARS) {
+    return { text: typeof text === "string" ? text : "", truncated: false };
+  }
+  return { text: "", truncated: true };
 }

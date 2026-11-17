@@ -1,7 +1,7 @@
 # Crios
 
-Cursor plugin that calls a Crios instance's HTTP API (`/api/v1`) for projects, build sessions, workflows, and connectors.
+Cursor plugin that calls the Crios HTTP API (`/api/v1`) for projects, build sessions, workflows, and connectors.
 
-Set `CRIOS_BASE_URL` (API or app origin, such as `https://api.example.com`) and `CRIOS_TOKEN` (a `crios_pat_` personal access token from Settings → API tokens) in the plugin configuration. Workflow calls need a full-access token. The repository README has install steps and the command list.
+The default origin is [https://crios.ai](https://crios.ai). Requests go to `https://crios.ai/api/v1` unless `CRIOS_BASE_URL` is set to another app or API origin. `CRIOS_TOKEN` is a `crios_pat_` personal access token from Settings → API tokens. Workflow calls need a full-access token.
 
-The MCP server is `mcp/server.mjs`. It reads those two environment variables and does not mint tokens.
+The MCP server is `mcp/server.mjs`. It reads those environment variables and does not mint tokens. The repository README has install steps and the command list.

@@ -7,7 +7,6 @@ The plugin is a [Cursor plugin](https://cursor.com/docs/reference/plugins) in `p
 ## What you need
 
 - Node.js 18 or newer on `PATH` (`node`). Cursor starts the MCP server with `node`.
-- The origin of your Crios API or web app.
 - A personal access token from that instance: **Settings → API tokens → Generate new token**. The value starts with `crios_pat_` and is shown once.
 
 Use a token that is not limited to a single project if you want to list every project. Workflow calls (`/api/v1/workflows`) need a **full-access** token. A fine-grained token with the **Projects** and **Sessions** scopes can list projects, start builds, and list project connectors. `GET /users/me` works with any token.
@@ -16,34 +15,35 @@ OAuth tokens (`crios_oat_`) are for the Crios MCP server only. This plugin calls
 
 ## Configure the base URL and token
 
-Install the plugin, then set the two plugin variables. Cursor stores the values in plugin configuration. They are not written into this repository.
+Install the plugin, then set the token. The base URL is optional. Cursor stores the values in plugin configuration. They are not written into this repository.
 
 | Variable | Example | Meaning |
 | --- | --- | --- |
-| `CRIOS_BASE_URL` | `https://api.example.com` | API or app origin. `https://app.example.com` works too. A path ending in `/api/v1` is kept; otherwise `/api/v1` is added. No username, password, query, or fragment. |
-| `CRIOS_TOKEN` | `crios_pat_…` | Personal access token. |
+| `CRIOS_BASE_URL` | `https://crios.ai` | App home, or another instance's origin. This is the default. The plugin derives the API root by adding `/api/v1` when the path does not already end there. No username, password, query, or fragment. |
+| `CRIOS_TOKEN` | `crios_pat_…` | Personal access token. Required. |
 
-Hosted Crios uses `https://api.crios.ai`. A self-hosted app origin is the same host you open in the browser. `http://127.0.0.1:8080` is accepted for an instance on your machine.
+The Crios home page is `https://crios.ai`. With no override, requests go to `https://crios.ai/api/v1`. Set `CRIOS_BASE_URL` for a self-hosted app, including `http://127.0.0.1:8080`.
 
-In Cursor, open the installed plugin and choose **Configure** (Plugins → Configure). Fill in **Crios base URL** and **Crios personal access token**.
+In Cursor, open the installed plugin and choose **Configure** (Plugins → Configure). The base URL is filled with `https://crios.ai`. Replace it to use another instance, and fill in **Crios personal access token**.
 
-To run the server yourself:
+To run the server yourself against the default origin:
 
 ```bash
-export CRIOS_BASE_URL="https://api.example.com"
 export CRIOS_TOKEN="crios_pat_..."
 node plugins/crios/mcp/server.mjs
 ```
+
+To point at another instance, also set `CRIOS_BASE_URL`.
 
 ## Install
 
 This repository is a one-plugin marketplace. The plugin directory is `plugins/crios` (manifest at `plugins/crios/.cursor-plugin/plugin.json`).
 
-**Team marketplace.** An admin imports the Git repository from Dashboard → Plugins & MCPs → Add Marketplace → Import from Repo. Teammates install **Crios** from Customize, then set the two variables.
+**Team marketplace.** An admin imports the Git repository from Dashboard → Plugins & MCPs → Add Marketplace → Import from Repo. Teammates install **Crios** from Customize, then set the token. The base URL stays `https://crios.ai` unless they change it.
 
 **Local check.** Copy `plugins/crios` to `~/.cursor/plugins/local/crios` (the folder that contains `.cursor-plugin/plugin.json`). Restart Cursor or run Developer: Reload Window, then open Customize and confirm the Crios commands and the `crios` MCP server. A symlink to a checkout outside that folder is ignored. On Enterprise, local imports must be allowed.
 
-The MCP server is `node ${CURSOR_PLUGIN_ROOT}/mcp/server.mjs`. Cursor substitutes the plugin root and the two variables.
+The MCP server is `node ${CURSOR_PLUGIN_ROOT}/mcp/server.mjs`. Cursor substitutes the plugin root, the token, and the base URL when one is configured.
 
 ## Commands
 

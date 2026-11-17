@@ -186,6 +186,32 @@ test("a missing token is reported without leaving stdio", async () => {
   }
 });
 
+test("an unset base URL defaults instead of failing, and a bad override does not call the network", async () => {
+  const env = { ...process.env, CRIOS_TOKEN: "" };
+  delete env.CRIOS_BASE_URL;
+  const missing = startMcpWithEnv(env);
+  try {
+    await missing.request("initialize", { protocolVersion: "2024-11-05", capabilities: {} });
+    const result = await missing.request("tools/call", { name: "whoami", arguments: {} });
+    assert.equal(result.result.isError, true);
+    assert.match(result.result.content[0].text, /CRIOS_TOKEN is not set/);
+    assert.equal(/CRIOS_BASE_URL is not set/.test(result.result.content[0].text), false);
+  } finally {
+    await missing.close();
+  }
+
+  const bad = startMcpWithEnv({ ...process.env, CRIOS_BASE_URL: "ftp://crios.ai", CRIOS_TOKEN: TOKEN });
+  try {
+    await bad.request("initialize", { protocolVersion: "2024-11-05", capabilities: {} });
+    const result = await bad.request("tools/call", { name: "list_projects", arguments: {} });
+    assert.equal(result.result.isError, true);
+    assert.match(result.result.content[0].text, /http or https/);
+    assert.equal(result.result.content[0].text.includes(TOKEN), false);
+  } finally {
+    await bad.close();
+  }
+});
+
 test("Content-Length frames are accepted and answered in the same framing", async () => {
   const child = spawn(process.execPath, [serverPath], {
     env: { ...process.env, CRIOS_BASE_URL: "https://api.example.com", CRIOS_TOKEN: TOKEN },
@@ -268,8 +294,12 @@ function route(method, urlPath) {
 }
 
 function startMcp(baseUrl, token = TOKEN) {
+  return startMcpWithEnv({ ...process.env, CRIOS_BASE_URL: baseUrl, CRIOS_TOKEN: token });
+}
+
+function startMcpWithEnv(env) {
   const child = spawn(process.execPath, [serverPath], {
-    env: { ...process.env, CRIOS_BASE_URL: baseUrl, CRIOS_TOKEN: token },
+    env,
     stdio: ["pipe", "pipe", "pipe"],
   });
   let buf = "";
