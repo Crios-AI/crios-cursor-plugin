@@ -21,13 +21,15 @@ test("normalizeBaseUrl appends /api/v1 and keeps an existing API root", () => {
   assert.equal(normalizeBaseUrl("http://127.0.0.1:8080/api"), "http://127.0.0.1:8080/api/v1");
 });
 
-test("the default origin is https://crios.ai and an override replaces it", () => {
-  assert.equal(normalizeBaseUrl(undefined), "https://crios.ai/api/v1");
-  assert.equal(normalizeBaseUrl(""), "https://crios.ai/api/v1");
-  assert.equal(normalizeBaseUrl("   "), "https://crios.ai/api/v1");
-  assert.equal(normalizeBaseUrl("${CRIOS_BASE_URL}"), "https://crios.ai/api/v1");
+test("the default API origin is https://api.crios.ai and an override replaces it", () => {
+  assert.equal(DEFAULT_ORIGIN, "https://api.crios.ai");
+  assert.equal(normalizeBaseUrl(undefined), "https://api.crios.ai/api/v1");
+  assert.equal(normalizeBaseUrl(""), "https://api.crios.ai/api/v1");
+  assert.equal(normalizeBaseUrl("   "), "https://api.crios.ai/api/v1");
+  assert.equal(normalizeBaseUrl("${CRIOS_BASE_URL}"), "https://api.crios.ai/api/v1");
+  assert.equal(normalizeBaseUrl("https://api.crios.ai"), "https://api.crios.ai/api/v1");
+  assert.equal(normalizeBaseUrl("https://api.crios.ai/api/v1/"), "https://api.crios.ai/api/v1");
   assert.equal(normalizeBaseUrl("https://crios.ai"), "https://crios.ai/api/v1");
-  assert.equal(normalizeBaseUrl("https://crios.ai/api/v1/"), "https://crios.ai/api/v1");
   assert.equal(normalizeBaseUrl("https://api.example.com"), "https://api.example.com/api/v1");
   assert.equal(normalizeBaseUrl("http://127.0.0.1:8080"), "http://127.0.0.1:8080/api/v1");
 });
@@ -97,7 +99,7 @@ test("error bodies and redirects do not expose the token", async () => {
   }
 });
 
-test("an omitted base URL calls https://crios.ai/api/v1 and an override does not", async () => {
+test("an omitted base URL calls https://api.crios.ai/api/v1 and an override does not", async () => {
   const seen = [];
   const fetchImpl = async (url, init) => {
     seen.push({ url: String(url), authorization: init.headers.Authorization, body: init.body ?? null });
@@ -111,7 +113,7 @@ test("an omitted base URL calls https://crios.ai/api/v1 and an override does not
   const override = new CriosClient({ baseUrl: "http://127.0.0.1:8080", token: TOKEN, fetchImpl });
   await override.request("POST", "/projects", { body: { name: "Notes" } });
 
-  assert.equal(seen[0].url, "https://crios.ai/api/v1/users/me");
+  assert.equal(seen[0].url, "https://api.crios.ai/api/v1/users/me");
   assert.equal(seen[0].authorization, `Bearer ${TOKEN}`);
   assert.equal(seen[0].url.includes(TOKEN), false);
   assert.equal(seen[1].url, "http://127.0.0.1:8080/api/v1/projects");
@@ -130,7 +132,7 @@ test("HTML, oversized bodies, refusal, and rate limits are errors", async () => 
   await assert.rejects(htmlClient.request("GET", "/users/me"), (error) => {
     assert.ok(error instanceof CriosError);
     assert.match(error.message, /not JSON/);
-    assert.match(error.message, /https:\/\/crios\.ai\/api\/v1/);
+    assert.match(error.message, /https:\/\/api\.crios\.ai\/api\/v1/);
     assert.equal(error.message.includes(TOKEN), false);
     return true;
   });
@@ -203,7 +205,7 @@ test("a network failure names the API root and not the token", async () => {
     },
   });
   await assert.rejects(client.request("GET", "/users/me"), (error) => {
-    assert.match(error.message, /Could not reach Crios at https:\/\/crios\.ai\/api\/v1/);
+    assert.match(error.message, /Could not reach Crios at https:\/\/api\.crios\.ai\/api\/v1/);
     assert.equal(error.message.includes(TOKEN), false);
     return true;
   });

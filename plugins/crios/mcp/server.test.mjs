@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { once } from "node:events";
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -215,52 +214,6 @@ test("an unset base URL defaults instead of failing, and a bad override does not
     assert.equal(result.result.content[0].text.includes(TOKEN), false);
   } finally {
     await bad.close();
-  }
-});
-
-test("the server receives CRIOS_TOKEN and CRIOS_BASE_URL only through mcp.json", async () => {
-  const seen = [];
-  const http = await listen((request, response) => {
-    seen.push({
-      authorization: request.headers.authorization,
-      url: request.url,
-    });
-    response.writeHead(200, { "content-type": "application/json" });
-    response.end(JSON.stringify(route(request.method, request.url)));
-  });
-  try {
-    const pluginRoot = path.resolve(path.dirname(serverPath), "..");
-    const mcp = JSON.parse(await readFile(path.join(pluginRoot, "mcp.json"), "utf8"));
-    const manifest = JSON.parse(await readFile(path.join(pluginRoot, ".cursor-plugin/plugin.json"), "utf8"));
-    const declared = Object.keys(manifest.variables.properties);
-    const envSpec = mcp.mcpServers?.crios?.env;
-    assert.ok(envSpec, "mcp.json does not pass plugin config into the crios server");
-    const config = {
-      CRIOS_BASE_URL: `http://127.0.0.1:${http.address().port}`,
-      CRIOS_TOKEN: TOKEN,
-    };
-    const env = { ...process.env };
-    for (const name of declared) delete env[name];
-    for (const name of declared) {
-      assert.equal(envSpec[name], `\${${name}}`);
-      const value = envSpec[name].replaceAll(`\${${name}}`, config[name]);
-      assert.equal(value.includes("$"), false);
-      env[name] = value;
-    }
-
-    const mcpServer = startMcpWithEnv(env);
-    try {
-      await mcpServer.request("initialize", { protocolVersion: "2025-03-26", capabilities: {} });
-      const result = await mcpServer.request("tools/call", { name: "whoami", arguments: {} });
-      assert.equal(result.result?.isError, false, result.result?.content?.[0]?.text ?? result.error?.message);
-      assert.equal(seen.length, 1);
-      assert.equal(seen[0].url, "/api/v1/users/me");
-      assert.equal(seen[0].authorization, `Bearer ${TOKEN}`);
-    } finally {
-      await mcpServer.close();
-    }
-  } finally {
-    await close(http);
   }
 });
 

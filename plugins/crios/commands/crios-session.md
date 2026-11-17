@@ -5,6 +5,6 @@ description: Show the status of a Crios build session.
 
 # Crios session status
 
-Call `get_session` with the session id. If the user did not give one, call `list_sessions` for the project they mean, or the organization list when they did not name a project, and use the session they pick.
+Call `get_session_status` with the session id. If the user did not give one, ask for it. To wait until the session rests or finishes, call `wait_for_session`.
 
-Report status, progress (`current_step` of `total_steps`), cost, pull request URL, branch, and any error. A session at `waiting_input` or `idle` is resting; offer to send a follow-up with `send_message`.
+Report status, progress, cost, pull request URL, and any error the tool returns. A session at `waiting_input` or `idle` is resting; offer to send a follow-up with `send_message`.

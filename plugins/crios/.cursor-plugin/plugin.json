@@ -18,13 +18,13 @@
       "CRIOS_BASE_URL": {
         "type": "string",
         "title": "Crios base URL",
-        "description": "App or API origin. Defaults to https://crios.ai. The plugin calls /api/v1 on that origin. Set this to point at another instance. Do not include a token in the URL.",
-        "default": "https://crios.ai"
+        "description": "REST API origin for the bundled client. Defaults to https://api.crios.ai. The client calls /api/v1 on that origin. This does not change the hosted MCP server at https://mcp.crios.ai/mcp. Do not include a token in the URL.",
+        "default": "https://api.crios.ai"
       },
       "CRIOS_TOKEN": {
         "type": "string",
         "title": "Crios personal access token",
-        "description": "Personal access token from Crios Settings → API tokens. Set it here in Plugins → Configure. It starts with crios_pat_. A full-access token is required for workflows."
+        "description": "Personal access token from Crios Settings → API tokens. Set it here in Plugins → Configure. It starts with crios_pat_. Cursor sends it as the Authorization bearer header to https://mcp.crios.ai/mcp. A full-access token is required for workflows."
       }
     },
     "required": ["CRIOS_TOKEN"]

@@ -1,10 +1,10 @@
 ---
 name: crios-whoami
-description: Show the Crios user and organization for the configured personal access token.
+description: Show that the configured Crios personal access token can reach the hosted MCP server.
 ---
 
 # Who am I in Crios
 
-Call the `whoami` tool.
+The hosted server has no separate whoami tool. Call `list_projects`.
 
-Report the name, email, role, and active organization. The default origin is `https://crios.ai`. If the tool says the token is missing, tell the user to open Plugins → Configure and set Crios personal access token. Mention Crios base URL only when the user wants a different instance. Do not tell them to set a shell variable, and do not ask them to paste the token into chat.
+If it succeeds, the personal access token was accepted. Report the projects it returns. If it fails because the token is missing, tell the user to open Plugins → Configure and set Crios personal access token. Do not tell them to set a shell variable, and do not ask them to paste the token into chat. Mention Crios base URL only when they are running the bundled REST client against another API origin. The product home is `https://crios.ai`. The MCP server is `https://mcp.crios.ai/mcp`.

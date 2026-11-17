@@ -5,10 +5,10 @@ description: List Crios workflows and run one when the user asks.
 
 # Crios workflows
 
-Call `list_workflows`. Pass `project_id` when the user is talking about one project.
+Call `workflow_list`. Pass the project when the user is talking about one project.
 
-Show name, id, active version, and whether setup is still required.
+Show the name, id, and status the tool returns.
 
-Run a workflow only when the user asks. Call `run_workflow` with `mode` `test` unless they explicitly want the active version, in which case use `production`. Then call `get_execution` with the returned execution id and report its status.
+Run a workflow only when the user asks. Call `workflow_run` in test mode unless they explicitly want the active version, in which case use production. Then call `execution_status` with the returned execution id and report its status.
 
-A 403 here usually means the personal access token is fine-grained. Workflow routes need a full-access token.
+A 403 here usually means the personal access token is fine-grained. Workflow tools need a full-access token.
